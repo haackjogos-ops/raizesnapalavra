@@ -1,9 +1,85 @@
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { BookOpen, Calendar, TrendingUp, Award, Clock, Users } from "lucide-react";
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Dashboard = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [userStats, setUserStats] = useState({
+    completedStudies: 0,
+    currentStreak: 0,
+    totalTime: 0,
+    nextEvent: null as any,
+  });
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    if (loading) return;
+    
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+
+    fetchUserData();
+  }, [user, loading, navigate]);
+
+  const fetchUserData = async () => {
+    if (!user) return;
+
+    try {
+      // Fetch user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      setUserProfile(profile);
+
+      // Fetch completed studies count
+      const { count: completedCount } = await supabase
+        .from('user_study_progress')
+        .select('*', { count: 'exact' })
+        .eq('user_id', user.id)
+        .eq('completed', true);
+
+      // Fetch next event
+      const { data: nextEvent } = await supabase
+        .from('events')
+        .select('*')
+        .gte('event_date', new Date().toISOString())
+        .order('event_date', { ascending: true })
+        .limit(1)
+        .single();
+
+      setUserStats({
+        completedStudies: completedCount || 0,
+        currentStreak: 23, // Mock data for now
+        totalTime: 84, // Mock data for now
+        nextEvent,
+      });
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
+        <div className="text-center">
+          <BookOpen className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-subtle p-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -11,13 +87,17 @@ const Dashboard = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Olá, João! 👋</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              Olá, {userProfile?.display_name || user?.email?.split('@')[0] || 'Usuário'}! 👋
+            </h1>
             <p className="text-muted-foreground mt-2">Continue sua jornada de crescimento espiritual</p>
           </div>
-          <Button variant="hero" className="mt-4 md:mt-0">
-            <BookOpen className="mr-2 h-4 w-4" />
-            Novo Estudo
-          </Button>
+          <Link to="/estudos">
+            <Button variant="hero" className="mt-4 md:mt-0">
+              <BookOpen className="mr-2 h-4 w-4" />
+              Novo Estudo
+            </Button>
+          </Link>
         </div>
 
         {/* Stats Cards */}
@@ -28,7 +108,7 @@ const Dashboard = () => {
               <Award className="h-4 w-4 text-accent" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">47</div>
+              <div className="text-2xl font-bold text-foreground">{userStats.completedStudies}</div>
               <p className="text-xs text-muted-foreground">+12% este mês</p>
             </CardContent>
           </Card>
@@ -39,7 +119,7 @@ const Dashboard = () => {
               <TrendingUp className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">23 dias</div>
+              <div className="text-2xl font-bold text-foreground">{userStats.currentStreak} dias</div>
               <p className="text-xs text-muted-foreground">Continue assim!</p>
             </CardContent>
           </Card>
@@ -50,7 +130,7 @@ const Dashboard = () => {
               <Clock className="h-4 w-4 text-secondary-dark" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">84h</div>
+              <div className="text-2xl font-bold text-foreground">{userStats.totalTime}h</div>
               <p className="text-xs text-muted-foreground">Média 2h/semana</p>
             </CardContent>
           </Card>
@@ -61,8 +141,15 @@ const Dashboard = () => {
               <Users className="h-4 w-4 text-accent" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">2 dias</div>
-              <p className="text-xs text-muted-foreground">Quarta, 19h</p>
+              <div className="text-2xl font-bold text-foreground">
+                {userStats.nextEvent 
+                  ? Math.ceil((new Date(userStats.nextEvent.event_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                  : '--'
+                } dias
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {userStats.nextEvent?.title || 'Nenhum evento próximo'}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -92,7 +179,9 @@ const Dashboard = () => {
                   veredas da justiça, por amor do seu nome..."
                 </p>
                 <div className="flex items-center space-x-4 pt-4">
+                <Link to="/estudos">
                   <Button variant="hero">Começar Estudo</Button>
+                </Link>
                   <span className="text-sm text-muted-foreground">⏱️ 15-20 min</span>
                 </div>
               </CardContent>
@@ -122,9 +211,11 @@ const Dashboard = () => {
                   <Progress value={40} className="h-2" />
                 </div>
 
-                <Button className="w-full mt-4" variant="outline">
-                  Ver Todos os Estudos
-                </Button>
+                <Link to="/estudos">
+                  <Button className="w-full mt-4" variant="outline">
+                    Ver Todos os Estudos
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 

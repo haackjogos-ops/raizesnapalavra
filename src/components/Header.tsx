@@ -1,8 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu } from "lucide-react";
+import { BookOpen, Menu, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Header = () => {
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -13,25 +20,54 @@ const Header = () => {
           <span className="text-xl font-bold text-foreground">Raízes na Palavra</span>
         </Link>
 
-        <nav className="hidden md:flex items-center space-x-8">
-          <Link to="/estudos" className="text-muted-foreground hover:text-foreground transition-colors">
-            Estudos
-          </Link>
-          <Link to="/encontros" className="text-muted-foreground hover:text-foreground transition-colors">
-            Encontros
-          </Link>
-          <Link to="/sobre" className="text-muted-foreground hover:text-foreground transition-colors">
-            Sobre
-          </Link>
+        <nav className="hidden md:flex items-center space-x-6">
+          {user ? (
+            <>
+              <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+                Dashboard
+              </Link>
+              <Link to="/estudos" className="text-muted-foreground hover:text-foreground transition-colors">
+                Estudos
+              </Link>
+              <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground hover:text-foreground">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/estudos" className="text-muted-foreground hover:text-foreground transition-colors">
+                Estudos
+              </Link>
+              <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+                Recursos
+              </a>
+              <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
+                Sobre
+              </a>
+            </>
+          )}
         </nav>
 
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" className="hidden md:flex">
-            Entrar
-          </Button>
-          <Button variant="hero" className="hidden md:flex">
-            Começar
-          </Button>
+          {user ? (
+            <span className="text-sm text-muted-foreground hidden md:block">
+              Olá, {user.user_metadata?.display_name || user.email}
+            </span>
+          ) : (
+            <>
+              <Link to="/auth">
+                <Button variant="ghost" className="hidden md:flex">
+                  Entrar
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button variant="hero" className="hidden md:flex">
+                  Começar
+                </Button>
+              </Link>
+            </>
+          )}
           
           <Button variant="ghost" size="icon" className="md:hidden">
             <Menu className="h-5 w-5" />

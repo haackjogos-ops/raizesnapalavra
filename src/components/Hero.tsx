@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { ArrowRight, BookOpen } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { BookOpen, Users, Calendar, TrendingUp } from "lucide-react";
+import { Users, Calendar, TrendingUp } from "lucide-react";
 import heroImage from "@/assets/hero-bible-study.jpg";
 
 const Hero = () => {
@@ -25,12 +27,18 @@ const Hero = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="hero" size="lg" className="text-lg px-8 py-6">
-                Começar Jornada
-              </Button>
-              <Button variant="outline" size="lg" className="text-lg px-8 py-6">
-                Saber Mais
-              </Button>
+              <Link to="/auth">
+                <Button variant="hero" size="lg" className="text-lg px-8 py-6">
+                  Começar Jornada
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to="/estudos">
+                <Button variant="outline" size="lg" className="text-lg px-8 py-6">
+                  <BookOpen className="mr-2 h-5 w-5" />
+                  Ver Estudos
+                </Button>
+              </Link>
             </div>
 
             {/* Stats */}
