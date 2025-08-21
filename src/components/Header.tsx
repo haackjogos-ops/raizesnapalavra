@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, LogOut } from "lucide-react";
+import { BookOpen, Menu, LogOut, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 
 const Header = () => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
 
   const handleSignOut = async () => {
     await signOut();
@@ -29,6 +31,12 @@ const Header = () => {
               <Link to="/estudos" className="text-muted-foreground hover:text-foreground transition-colors">
                 Estudos
               </Link>
+              {isAdmin && (
+                <Link to="/admin" className="text-muted-foreground hover:text-primary transition-colors flex items-center">
+                  <Shield className="mr-1 h-4 w-4" />
+                  Admin
+                </Link>
+              )}
               <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground hover:text-foreground">
                 <LogOut className="mr-2 h-4 w-4" />
                 Sair
