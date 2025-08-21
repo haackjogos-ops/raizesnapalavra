@@ -24,7 +24,9 @@ const EventForm = ({ onEventCreated }: EventFormProps) => {
 
     setIsLoading(true);
     
-    const formData = new FormData(e.currentTarget);
+    // Capture form reference before async operations
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     const eventData = {
       title: formData.get('title') as string,
       description: formData.get('description') as string,
@@ -46,7 +48,7 @@ const EventForm = ({ onEventCreated }: EventFormProps) => {
       });
 
       // Reset form
-      e.currentTarget.reset();
+      form.reset();
       
       if (onEventCreated) {
         onEventCreated();

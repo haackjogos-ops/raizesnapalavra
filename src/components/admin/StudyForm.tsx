@@ -25,7 +25,9 @@ const StudyForm = ({ onStudyCreated }: StudyFormProps) => {
 
     setIsLoading(true);
     
-    const formData = new FormData(e.currentTarget);
+    // Capture form reference before async operations
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     const studyData = {
       title: formData.get('title') as string,
       content: formData.get('content') as string,
@@ -56,7 +58,7 @@ const StudyForm = ({ onStudyCreated }: StudyFormProps) => {
       });
 
       // Reset form
-      e.currentTarget.reset();
+      form.reset();
       setIsDailyStudy(false);
       
       if (onStudyCreated) {
