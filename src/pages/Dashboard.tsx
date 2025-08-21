@@ -6,6 +6,7 @@ import { BookOpen, Calendar, TrendingUp, Award, Clock, Users } from "lucide-reac
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, Link } from 'react-router-dom';
+import Header from "@/components/Header";
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
@@ -81,7 +82,8 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle p-6">
+    <div className="min-h-screen bg-gradient-subtle pt-20 p-6">
+      <Header />
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header */}
